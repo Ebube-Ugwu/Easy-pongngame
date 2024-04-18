@@ -3,6 +3,7 @@ import sys
 from pygame import *
 
 pygame.font.init()
+pygame.mixer.init()
 BALLVELOCITY = 0.15
 BARVELOCITY = 30
 
@@ -15,6 +16,9 @@ SCREENWIDTH = 800
 SCREENHEIGHT = 600
 SCOREFONT = pygame.font.Font("METAVERSE.otf", 50)
 SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
+HITSOUND = pygame.mixer.Sound("hit-sound.wav")
+SCORESOUND = pygame.mixer.Sound("score-sound.wav")
+pygame.mixer.music.load("background-music.wav")
 
 
 class Main():
@@ -23,6 +27,7 @@ class Main():
         running = True
         pygame.display.set_caption("PONG")
         SCREEN.fill(BGCOLOR)
+        pygame.mixer.music.play()
         player_one = Bar(FIRSTBARCOLOR, 1)
         player_two = Bar(SECONDBARCOLOR, 2)
         ball = Ball()
@@ -61,13 +66,13 @@ class Main():
             ball.check_wall_collision()
             ball.check_bar_collision(player_one)
             ball.check_bar_collision(player_two)
-
-            if ball.check_player_score() == 1:
-                print('one')
-                score_one += 1
-            elif ball.check_player_score() == 2:
+            winner = ball.check_player_score()
+            if winner == 2:
                 print('yes')
                 score_two += 1
+            elif winner == 1:
+                print('one')
+                score_one += 1
 
             pygame.display.update()
 
@@ -132,6 +137,7 @@ class Ball():
         x, y, width, height = bar.x, bar.y, bar.width, bar.height
         rect = pygame.Rect(x, y, width, height)
         if rect.collidepoint(self.x, self.y):
+            HITSOUND.play()
             self.x_velocity *= -1
             self.ball_hits += 1
         return
@@ -144,9 +150,11 @@ class Ball():
     def check_player_score(self):
         if self.x >= (SCREENWIDTH + self.radius):
             self.reset_ball()
+            SCORESOUND.play()
             return 1
         elif self.x <= (0):
             self.reset_ball()
+            SCORESOUND.play()
             return 2
 
     def move_ball(self):
@@ -162,4 +170,4 @@ def increase_ball_speed(self):
 
 
 if __name__ == "__main__":
-    main = Main()
+    Main()
